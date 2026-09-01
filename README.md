@@ -1,4 +1,4 @@
-# xv6 Process Synchronization Lab (OS Assignment 6)
+# xv6 Process Synchronization Lab (OS Assignment 5)
 
 This repository contains the implementations for **Operating Systems Lab Assignment 6**, focusing on classic process synchronization problems within the **xv6** teaching operating system. 
 

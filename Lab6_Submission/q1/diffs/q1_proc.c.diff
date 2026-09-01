@@ -1,0 +1,30 @@
+--- xv6-clean/proc.c	2026-08-24 14:26:16.677276700 +0000
++++ lab6/q1-peterson/proc.c	2026-09-01 12:12:57.490960600 +0000
+@@ -532,3 +532,27 @@
+     cprintf("\n");
+   }
+ }
++
++char *shm_page = 0;   // Lab 6 Q1: the shared physical page
++
++int
++shm_get(void)
++{
++  struct proc *cur = myproc();
++  char *page;
++
++  acquire(&ptable.lock);
++  if(shm_page == 0){
++    shm_page = kalloc();
++    if(shm_page)
++      memset(shm_page, 0, PGSIZE);
++  }
++  page = shm_page;
++  release(&ptable.lock);
++
++  if(page == 0)
++    return -1;
++  if(shm_map(cur->pgdir, (void*)SHM_VA, V2P(page)) < 0)
++    return -1;
++  return SHM_VA;
++}

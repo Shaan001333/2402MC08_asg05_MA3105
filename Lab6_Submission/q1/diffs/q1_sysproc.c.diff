@@ -1,0 +1,12 @@
+--- xv6-clean/sysproc.c	2026-08-24 14:26:16.859049500 +0000
++++ lab6/q1-peterson/sysproc.c	2026-09-01 12:12:57.485076500 +0000
+@@ -89,3 +89,9 @@
+   release(&tickslock);
+   return xticks;
+ }
++
++int
++sys_shm_get(void)
++{
++  return shm_get();
++}

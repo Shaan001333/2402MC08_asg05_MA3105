@@ -1,0 +1,30 @@
+--- xv6-clean/sysproc.c	2026-08-24 14:26:16.859049500 +0000
++++ lab6/q2-prodcons/sysproc.c	2026-09-01 13:40:10.019473900 +0000
+@@ -89,3 +89,27 @@
+   release(&tickslock);
+   return xticks;
+ }
++
++int
++sys_shm_get(void)
++{
++  return shm_get();
++}
++
++int sys_sem_init(void) {
++  int which, count;
++  if(argint(0, &which) < 0 || argint(1, &count) < 0) return -1;
++  return sem_init(which, count);
++}
++
++int sys_sem_wait(void) {
++  int which;
++  if(argint(0, &which) < 0) return -1;
++  return sem_wait(which);
++}
++
++int sys_sem_signal(void) {
++  int which;
++  if(argint(0, &which) < 0) return -1;
++  return sem_signal(which);
++}

@@ -1,0 +1,13 @@
+--- xv6-clean/user.h	2026-08-24 14:26:16.939492100 +0000
++++ lab6/q2-prodcons/user.h	2026-09-01 13:40:14.505339100 +0000
+@@ -23,6 +23,10 @@
+ char* sbrk(int);
+ int sleep(int);
+ int uptime(void);
++int shm_get(void);
++int sem_init(int, int);
++int sem_wait(int);
++int sem_signal(int);
+ 
+ // ulib.c
+ int stat(const char*, struct stat*);

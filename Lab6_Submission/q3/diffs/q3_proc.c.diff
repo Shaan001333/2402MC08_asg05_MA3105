@@ -1,0 +1,79 @@
+--- xv6-clean/proc.c	2026-08-24 14:26:16.677276700 +0000
++++ lab6/q3-readwrite/proc.c	2026-09-01 13:49:26.117868400 +0000
+@@ -532,3 +532,76 @@
+     cprintf("\n");
+   }
+ }
++
++char *shm_page = 0;   // Lab 6 Q1: the shared physical page
++
++int
++shm_get(void)
++{
++  struct proc *cur = myproc();
++  char *page;
++
++  acquire(&ptable.lock);
++  if(shm_page == 0){
++    shm_page = kalloc();
++    if(shm_page)
++      memset(shm_page, 0, PGSIZE);
++  }
++  page = shm_page;
++  release(&ptable.lock);
++
++  if(page == 0)
++    return -1;
++  if(shm_map(cur->pgdir, (void*)SHM_VA, V2P(page)) < 0)
++    return -1;
++  return SHM_VA;
++}
++
++// Lab 6 Q2: Kernel Semaphores for Producer-Consumer
++struct ksem {
++  struct spinlock lock;
++  int count;
++};
++struct ksem ksems[3]; // 0=empty, 1=full, 2=mutex
++static int ksems_initialized = 0;
++
++void init_ksems(void) {
++  if(!ksems_initialized) {
++    initlock(&ksems[0].lock, "sem_empty");
++    initlock(&ksems[1].lock, "sem_full");
++    initlock(&ksems[2].lock, "sem_mutex");
++    ksems_initialized = 1;
++  }
++}
++
++int sem_init(int which, int count) {
++  init_ksems();
++  if(which < 0 || which > 2) return -1;
++  acquire(&ksems[which].lock);
++  ksems[which].count = count;
++  release(&ksems[which].lock);
++  return 0;
++}
++
++int sem_wait(int which) {
++  init_ksems();
++  if(which < 0 || which > 2) return -1;
++  acquire(&ksems[which].lock);
++  while(ksems[which].count <= 0) {
++    sleep(&ksems[which], &ksems[which].lock); // sleep releases the lock, reacquires on wakeup
++  }
++  ksems[which].count--;
++  release(&ksems[which].lock);
++  return 0;
++}
++
++int sem_signal(int which) {
++  init_ksems();
++  if(which < 0 || which > 2) return -1;
++  acquire(&ksems[which].lock);
++  ksems[which].count++;
++  wakeup(&ksems[which]); // wake up any process sleeping on this semaphore
++  release(&ksems[which].lock);
++  return 0;
++}
++

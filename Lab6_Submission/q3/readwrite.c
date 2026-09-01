@@ -1,0 +1,89 @@
+#include "types.h"
+#include "stat.h"
+#include "user.h"
+
+#define NUM_READERS 3
+#define NUM_WRITERS 2
+#define LOOPS 3
+
+struct shared_data {
+  int read_count;
+  int shared_data;
+};
+
+int main(void) {
+  int pid, i;
+  struct shared_data *shm;
+
+  // Initialize kernel semaphores BEFORE forking (kernel state is global)
+  // 0=mutex, 1=wrt, 2=readTry
+  sem_init(0, 1);
+  sem_init(1, 1);
+  sem_init(2, 1);
+
+  // Spawn 5 processes (2 writers + 3 readers)
+  for(i = 0; i < NUM_READERS + NUM_WRITERS; i++){
+    pid = fork();
+    if(pid == 0) break; // Child breaks out to do work
+  }
+
+  // Map the shared memory (reusing Q1's syscall)
+  shm = (struct shared_data*)shm_get();
+
+  if (pid == 0) {
+    // CHILD LOGIC
+    if (i < NUM_WRITERS) {
+      // --- WRITER PROCESS ---
+      for(int k = 0; k < LOOPS; k++){
+        sem_wait(2); // wait(readTry) - queues behind waiting readers/writers
+        sem_wait(1); // wait(wrt) - exclusive access
+        
+        // CRITICAL SECTION (Write)
+        shm->shared_data++;
+        printf(1, "[Tick %d] WRITER %d wrote value: %d\n", uptime(), getpid(), shm->shared_data);
+        sleep(50); // Long write time to enforce exclusivity visibility
+        
+        // Exit
+        sem_signal(1); // signal(wrt)
+        sem_signal(2); // signal(readTry)
+        sleep(10); // Pause between loops
+      }
+      exit();
+    } else {
+      // --- READER PROCESS ---
+      for(int k = 0; k < LOOPS; k++){
+        sem_wait(2); // wait(readTry) - FAIRNESS: queues behind waiting writers
+        sem_wait(0); // wait(mutex)
+        
+        shm->read_count++;
+        if(shm->read_count == 1) 
+            sem_wait(1); // First reader locks out writers
+        
+        sem_signal(0); // signal(mutex)
+        sem_signal(2); // signal(readTry)
+        
+        // CRITICAL SECTION (Read)
+        printf(1, "[Tick %d] READER %d read value: %d (active readers: %d)\n", 
+               uptime(), getpid(), shm->shared_data, shm->read_count);
+        sleep(20); // Short read time
+        
+        sem_wait(0); // wait(mutex)
+        shm->read_count--;
+        if(shm->read_count == 0) 
+            sem_signal(1); // Last reader unlocks writers
+        sem_signal(0); // signal(mutex)
+        
+        sleep(5); // Pause between loops
+      }
+      exit();
+    }
+  } else {
+    // PARENT LOGIC (Wait for all 5 children)
+    for(i = 0; i < NUM_READERS + NUM_WRITERS; i++) 
+        wait();
+    
+    printf(1, "Final shared_data value: %d (Expected: %d)\n", 
+           shm->shared_data, NUM_WRITERS * LOOPS);
+    exit();
+  }
+}

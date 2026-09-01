@@ -1,0 +1,7 @@
+--- xv6-clean/memlayout.h	2026-08-24 14:26:16.599786600 +0000
++++ lab6/q3-readwrite/memlayout.h	2026-09-01 13:49:25.170220300 +0000
+@@ -13,3 +13,4 @@
+ 
+ #define V2P_WO(x) ((x) - KERNBASE)    // same as V2P, but without casts
+ #define P2V_WO(x) ((x) + KERNBASE)    // same as P2V, but without casts
++#define SHM_VA 0x60000000   // Lab 6 Q1: fixed user VA of the shared page

@@ -1,0 +1,10 @@
+--- xv6-clean/usys.S	2026-08-24 14:26:16.961714700 +0000
++++ lab6/q2-prodcons/usys.S	2026-09-01 13:40:14.551134500 +0000
+@@ -29,3 +29,7 @@
+ SYSCALL(sbrk)
+ SYSCALL(sleep)
+ SYSCALL(uptime)
++SYSCALL(shm_get)
++SYSCALL(sem_init)
++SYSCALL(sem_wait)
++SYSCALL(sem_signal)

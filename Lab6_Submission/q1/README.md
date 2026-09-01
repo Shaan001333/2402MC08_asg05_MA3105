@@ -1,4 +1,4 @@
-# Lab 6 Question 1: Peterson's Algorithm via Shared Memory
+# Lab 5 Question 1: Peterson's Algorithm via Shared Memory
 
 ## Design Overview
 To implement Peterson's Algorithm in xv6 (where `fork()` usually creates isolated memory spaces), we introduced a lightweight **shared memory mechanism**:

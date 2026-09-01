@@ -1,4 +1,4 @@
-# Lab 6 Question 3: Readers-Writers (Fair / no-writer-starvation solution)
+# Lab 5 Question 3: Readers-Writers (Fair / no-writer-starvation solution)
 
 ## Why NOT the plain "first readers-writers"
 Classic readers-priority lets an endless stream of readers keep `read_count > 0`,

@@ -1,4 +1,4 @@
-# Lab 6 Question 2: Producer-Consumer (Bounded Buffer) in xv6
+# Lab 5 Question 2: Producer-Consumer (Bounded Buffer) in xv6
 
 ## Semaphore implementation (own lightweight semaphores)
 - Implemented counting semaphores IN THE KERNEL (proc.c) using xv6's
